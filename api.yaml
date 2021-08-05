@@ -1,0 +1,146 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Awesome API
+  description: A simple API to illustrate OpenAPI concepts
+externalDocs:
+  description: Find out more about Swagger
+  url: https://editor.swagger.io/
+servers:
+  - url: https://j2hongming.io/v1
+
+security:
+  - bearerAuth: []
+
+paths:
+  /drinks:
+    get:
+      description: Get the drinks
+      parameters:
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/PageOffset'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Drink'
+
+    post:
+      description: Create the new drink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object 
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: Apple Juice
+                type:
+                  type: string
+                  example: juice
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drink_id:
+                    type: integer
+                    example: 1
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /drinks/{drink_id}:
+    get:
+      description: Obtain information about a drink from id
+      parameters:
+        - name: drink_id
+          in: path
+          required: true
+          schema:
+            type: string        
+      responses:
+        200:
+          description: Successfully returned an drink
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Drink'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    Drink:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Apple Juice
+        type:
+          type: string
+          example: juice
+    # Schema for error response body
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 1
+        message:
+          type: string
+          example: 
+      required:
+        - code
+        - message
+  parameters:
+    PageLimit:
+      name: limit
+      in: query
+      description: Limits the number of items on a page
+      example: 10
+      schema:
+        type: integer
+    PageOffset:
+      name: offset
+      in: query
+      description: Specifies the page number of the artists to be displayed
+      example: 5
+      schema:
+        type: integer
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
